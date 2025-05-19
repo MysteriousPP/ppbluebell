@@ -9,11 +9,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	orderTime  = "time"
-	orderScore = "score"
-)
-
 func CreatePostHandler(c *gin.Context) {
 	//1.获取参数及参数的校验
 	p := new(models.Post)
@@ -81,7 +76,7 @@ func GetPostListHandler2(c *gin.Context) {
 	p := &models.ParamPostList{
 		Page:  1,
 		Size:  10,
-		Order: orderTime, //magic string
+		Order: models.OrderTime, //magic string
 	}
 	//c.ShouldBind() 根据请求的数据类型选择相应的方法区获取数据
 	//c.ShouldBindJSON() 如果请求中携带的是json格式的数据，才能用这个方法获取到数据
@@ -90,9 +85,8 @@ func GetPostListHandler2(c *gin.Context) {
 		ResponseError(c, CodeInvalidParams)
 		return
 	}
-
+	data, err := logic.GetPostListNew(p) //更新：合二为一
 	//获取数据
-	data, err := logic.GetPostList2(p)
 	if err != nil {
 		zap.L().Error("logic.GetPostList() failed", zap.Error(err))
 		ResponseError(c, CodeServerBusy)
@@ -100,3 +94,31 @@ func GetPostListHandler2(c *gin.Context) {
 	}
 	ResponseSuccess(c, data)
 }
+
+// func GetCommunityPostListHandler(c *gin.Context) {
+// 	//GET请求参数(query string)： /api/v1/post2?page=1&size=10&order=time
+// 	//获取分页参数
+// 	p := &models.ParamCommunityPostList{
+// 		ParamPostList: &models.ParamPostList{
+// 			Page:  1,
+// 			Size:  10,
+// 			Order: models.OrderTime,
+// 		},
+// 	}
+// 	//c.ShouldBind() 根据请求的数据类型选择相应的方法区获取数据
+// 	//c.ShouldBindJSON() 如果请求中携带的是json格式的数据，才能用这个方法获取到数据
+// 	if err := c.ShouldBindQuery(p); err != nil {
+// 		zap.L().Error("GetCommunityPostListHandler with invalid param", zap.Error(err))
+// 		ResponseError(c, CodeInvalidParams)
+// 		return
+// 	}
+
+// 	//获取数据
+// 	data, err := logic.GetCommunityPostList(p)
+// 	if err != nil {
+// 		zap.L().Error("logic.GetPostList() failed", zap.Error(err))
+// 		ResponseError(c, CodeServerBusy)
+// 		return
+// 	}
+// 	ResponseSuccess(c, data)
+// }
