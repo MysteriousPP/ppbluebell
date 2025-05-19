@@ -2,6 +2,7 @@ package logic
 
 import (
 	"bluebell/dao/mysql"
+	"bluebell/dao/redis"
 	"bluebell/models"
 	"bluebell/pkg/snowflake"
 
@@ -10,9 +11,14 @@ import (
 
 func CreatePost(p *models.Post) (err error) {
 	//1.生成post id
-	p.PostID = uint64(snowflake.GenID())
+	p.PostID = snowflake.GenID()
 	//2.保存到数据库
-	return mysql.CreatePost(p)
+	err = mysql.CreatePost(p)
+	if err != nil {
+		return err
+	}
+	err = redis.CreatePost(int64(p.PostID))
+	return
 	//3.返回
 }
 
@@ -52,6 +58,52 @@ func GetPostList(page, size int64) (data []*models.ApiPostDetail, err error) {
 	}
 	data = make([]*models.ApiPostDetail, 0, len(posts))
 
+	for _, post := range posts {
+		// 根据作者id查询作者信息
+		user, err := mysql.GetUserById(post.AuthorId)
+		if err != nil {
+			zap.L().Error("mysql.GetUserById(post.AuthorID) failed",
+				zap.Int64("author_id", post.AuthorId),
+				zap.Error(err))
+			continue
+		}
+		//根据社区
+		communityDetail, err := mysql.GetCommunityDetailByID(post.CommunityID)
+		if err != nil {
+			zap.L().Error("mysql.GetUserById(post.AuthorID) failed",
+				zap.Int64("commmunity_id", post.CommunityID),
+				zap.Error(err))
+			continue
+		}
+		postDetail := &models.ApiPostDetail{
+			AuthorName:      user.Username,
+			Post:            post,
+			CommunityDetail: communityDetail,
+		}
+		data = append(data, postDetail)
+	}
+	return
+}
+
+func GetPostList2(p *models.ParamPostList) (data []*models.ApiPostDetail, err error) {
+	// 2.去redis查询id列表
+	ids, err := redis.GetPostIDsInOrder(p)
+	if err != nil {
+		return
+	}
+	if len(ids) == 0 {
+		zap.L().Warn("redis.GetPostIDsInOrder(p) return 0 data")
+		return
+	}
+
+	// 3.根据id去MySQL数据库查询帖子详情信息
+	// 返回的数据还要按照我给定的id的顺序返回
+	posts, err := mysql.GetPostListByIDs(ids)
+	if err != nil {
+		return
+	}
+
+	//将帖子的作者及分区信息查询出来填充到帖子中
 	for _, post := range posts {
 		// 根据作者id查询作者信息
 		user, err := mysql.GetUserById(post.AuthorId)
