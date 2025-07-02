@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"bluebell/models"
+	"database/sql"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -22,6 +23,31 @@ func CreatePost(p *models.Post) (err error) {
 	return
 }
 
+// DeletePostById 根据id删除某个帖子
+func DeletePostById(pid int64) (err error) {
+	sqlStr := `update post
+	set status = 0
+	where post_id = ?
+	`
+	// 执行更新
+	result, err := db.Exec(sqlStr, pid)
+	if err != nil {
+		zap.L().Error("delete post failed", zap.Error(err))
+		return
+	}
+
+	// 检查是否有行受影响
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		zap.L().Error("failed to get rows affected", zap.Error(err))
+		return
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
+
 // GetPostById 根据id查询单个帖子数据
 func GetPostById(pid int64) (post *models.Post, err error) {
 	post = new(models.Post)
@@ -37,6 +63,7 @@ func GetPostById(pid int64) (post *models.Post, err error) {
 func GetPostList(page, size int64) (posts []*models.Post, err error) {
 	sqlStr := `select post_id, title, content, author_id, community_id, create_time
 	from post
+	where status = 1
 	order by create_time
 	desc
 	limit ?,?

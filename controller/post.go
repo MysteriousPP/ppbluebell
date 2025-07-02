@@ -34,6 +34,27 @@ func CreatePostHandler(c *gin.Context) {
 	ResponseSuccess(c, nil)
 }
 
+// DeletePostHandler 删除帖子的处理函数
+func DeletePostHandler(c *gin.Context) {
+	// 1.获取参数(从url中获取帖子id)
+	pidStr := c.Param("id")
+	pid, err := strconv.ParseInt(pidStr, 10, 64)
+	if err != nil {
+		zap.L().Error("delete post detail with invalid param", zap.Error(err))
+		ResponseError(c, CodeInvalidParams)
+		return
+	}
+	// 2.根据id去更改帖子数据
+	err = logic.DeletePostById(pid)
+	if err != nil {
+		zap.L().Error("logic.DeletePostById(pid) failed", zap.Error(err))
+		ResponseError(c, CodeServerBusy)
+		return
+	}
+	// 3.返回相应
+	ResponseSuccess(c, nil)
+}
+
 // GetPostDetailHandler 获取帖子详情的处理函数
 func GetPostDetailHandler(c *gin.Context) {
 	// 1.获取参数(从url中获取帖子的id)
@@ -44,7 +65,7 @@ func GetPostDetailHandler(c *gin.Context) {
 		ResponseError(c, CodeInvalidParams)
 		return
 	}
-	// 2.根据id去除帖子数据（查数据库）
+	// 2.根据id去查帖子数据（查数据库）
 	data, err := logic.GetPostById(pid)
 	if err != nil {
 		zap.L().Error("logic.GetPostById(pid) failed", zap.Error(err))

@@ -63,7 +63,7 @@ func CheckPassword(username string, password string) (bool, error) {
 
 func Login(user *models.User) (err error) {
 	originPassword := user.Password // 记录一下原始密码
-	sqlStr := "select user_id, username, password from user where username = ?"
+	sqlStr := "select user_id, username, password, usertype from user where username = ?"
 	err = db.Get(user, sqlStr, user.Username)
 	// if err != nil && err != sql.ErrNoRows {
 	// 	// 查询数据库出错

@@ -21,7 +21,9 @@ func CreatePost(p *models.Post) (err error) {
 	return
 	//3.返回
 }
-
+func DeletePostById(pid int64) (err error) {
+	return mysql.DeletePostById(pid)
+}
 func GetPostById(pid int64) (data *models.ApiPostDetail, err error) {
 	data = new(models.ApiPostDetail)
 	post, err := mysql.GetPostById(pid)

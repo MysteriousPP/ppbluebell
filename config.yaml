@@ -7,7 +7,8 @@ machine_id : 1
 
 
 auth:
- jwt_expire: 8760
+ jwt_access_expire: 6000 #8760
+ jwt_refresh_expire: 6000 #8760
 log:
   level: "debug"
   filename: "web_app.log"

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -69,10 +70,18 @@ func LoginHandler(c *gin.Context) {
 		ResponseError(c, CodeInvalidPassword)
 		return
 	}
+	c.SetCookie("refresh_token",
+		user.RefreshToken,
+		viper.GetInt("auth.refresh_token_expire"),
+		"/",
+		"",
+		false,
+		true)
 	//3.返回响应
 	ResponseSuccess(c, gin.H{
-		"user_id":   fmt.Sprintf("%d", user.UserID),
-		"user_name": user.Username,
-		"token":     user.Token,
+		"user_id":       fmt.Sprintf("%d", user.UserID),
+		"user_name":     user.Username,
+		"access_token":  user.AccessToken,
+		"refresh_token": user.RefreshToken,
 	})
 }

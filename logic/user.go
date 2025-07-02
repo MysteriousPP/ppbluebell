@@ -55,12 +55,18 @@ func Login(p *models.ParamLogin) (user *models.User, err error) {
 		return nil, err
 	}
 
-	token, err := jwt.GenToken(user.UserID, p.Username)
+	accessToken, err := jwt.GenAccessToken(user.UserID, p.Username, user.UserType)
 	if err != nil {
 		return
 	}
 
-	user.Token = token
+	refreshToken, err := jwt.GenRefreshToken(user.UserID, p.Username, user.UserType)
+	if err != nil {
+		return
+	}
+
+	user.AccessToken = accessToken
+	user.RefreshToken = refreshToken
 	return
 	//生成jwt
 }
