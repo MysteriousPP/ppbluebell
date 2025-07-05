@@ -55,7 +55,11 @@ func Init() (err error) {
 	err = viper.ReadInConfig()    //读取配置信息
 
 	//viper.SetConfigFile("./conf/config.yaml")
-
+	viper.SetDefault("cors.allow_origins", []string{"http://localhost:5173"})
+	viper.SetDefault("cors.allow_methods", []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+	viper.SetDefault("cors.allow_headers", []string{"Content-Type", "Authorization"})
+	viper.SetDefault("cors.allow_credentials", true)
+	viper.SetDefault("cors.max_age", 12) // 小时
 	if err != nil {
 		fmt.Printf("viper.ReadingInConfig() failed, err#{err}\n")
 		return

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 // func CorsMiddleware() gin.HandlerFunc {
@@ -32,17 +33,23 @@ func Setup() *gin.Engine {
 	r.Use(logger.GinLogger(), logger.GinRecovery(true), middlewares.RateLimitMiddleware(2*time.Second, 100))
 
 	// 配置 CORS（开发环境允许所有来源）
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // 前端地址
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Content-Type", "Authorization"},
-		AllowCredentials: true, // 允许传 Cookie
-		MaxAge:           12 * time.Hour,
-	}))
+	// r.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     []string{"http://localhost:5173"}, // 前端地址
+	// 	AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	// 	AllowHeaders:     []string{"Content-Type", "Authorization"},
+	// 	AllowCredentials: true, // 允许传 Cookie
+	// 	MaxAge:           12 * time.Hour,
+	// }))
 	// r.Use(CorsMiddleware())
 	// 或者最简单的允许所有来源（仅限开发测试）
 	//r.Use(cors.Default())
-
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     viper.GetStringSlice("cors.allow_origins"),
+		AllowMethods:     viper.GetStringSlice("cors.allow_methods"),
+		AllowHeaders:     viper.GetStringSlice("cors.allow_headers"),
+		AllowCredentials: viper.GetBool("cors.allow_credentials"),
+		MaxAge:           time.Duration(viper.GetInt("cors.max_age")) * time.Hour,
+	}))
 	v1 := r.Group("/api/v1")
 	//注册路由业务
 	v1.POST("/signup", controller.SignUpHandler)
