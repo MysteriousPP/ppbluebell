@@ -14,7 +14,7 @@ create table community
 )
     collate = utf8mb4_general_ci;
 
-INSERT INTO bluebell.community (id, community_id, community_name, introduction, create_time, update_time) VALUES (1, 1, 'Go', 'Golang', '2016-11-01 08:10:10', '2016-11-01 08:10:10');
-INSERT INTO bluebell.community (id, community_id, community_name, introduction, create_time, update_time) VALUES (2, 2, 'leetcode', '刷题刷题刷题', '2020-01-01 08:00:00', '2020-01-01 08:00:00');
-INSERT INTO bluebell.community (id, community_id, community_name, introduction, create_time, update_time) VALUES (3, 3, 'CS:GO', 'Rush B。。。', '2018-08-07 08:30:00', '2018-08-07 08:30:00');
-INSERT INTO bluebell.community (id, community_id, community_name, introduction, create_time, update_time) VALUES (4, 4, 'LOL', '欢迎来到英雄联盟!', '2016-01-01 08:00:00', '2016-01-01 08:00:00');
+INSERT INTO bluebell.community (id, community_id, community_name, introduction, create_time, update_time) VALUES (1, 1, 'Go', 'Golang', '2025-06-07 08:30:00', '2025-06-07 08:30:00');
+INSERT INTO bluebell.community (id, community_id, community_name, introduction, create_time, update_time) VALUES (2, 2, 'leetcode', '刷题刷题刷题', '2025-06-07 08:30:00', '2025-06-07 08:30:00');
+INSERT INTO bluebell.community (id, community_id, community_name, introduction, create_time, update_time) VALUES (3, 3, '瓦罗兰特', '我不是瓦学弟', '2025-06-07 08:30:00', '2025-06-07 08:30:00');
+INSERT INTO bluebell.community (id, community_id, community_name, introduction, create_time, update_time) VALUES (4, 4, '编程', '想成为高手', '2025-06-07 08:30:00', '2025-06-07 08:30:00');
