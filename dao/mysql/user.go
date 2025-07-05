@@ -6,6 +6,8 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"errors"
+
+	"go.uber.org/zap"
 )
 
 const secret = "MysteriousPP"
@@ -75,6 +77,8 @@ func Login(user *models.User) (err error) {
 	}
 	// 生成加密密码与查询到的密码比较
 	password := encryptPassword(originPassword)
+	zap.L().Error("oriPassword", zap.String("oriPassword", originPassword))
+	zap.L().Error("password", zap.String("Password", password))
 	if user.Password != password {
 		return ErrorPasswordWrong
 	}

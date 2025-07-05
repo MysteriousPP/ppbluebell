@@ -4,6 +4,7 @@ import (
 	"bluebell/controller"
 	"bluebell/logger"
 	"bluebell/middlewares"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -50,6 +51,8 @@ func Setup() *gin.Engine {
 		AllowCredentials: viper.GetBool("cors.allow_credentials"),
 		MaxAge:           time.Duration(viper.GetInt("cors.max_age")) * time.Hour,
 	}))
+	fmt.Println("1111", viper.GetStringSlice("cors.allow_origins"))
+	fmt.Println("2222", []string{"http://localhost:5173", "nmnmnmnmnmnm"})
 	v1 := r.Group("/api/v1")
 	//注册路由业务
 	v1.POST("/signup", controller.SignUpHandler)

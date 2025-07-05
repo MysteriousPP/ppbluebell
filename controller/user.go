@@ -62,7 +62,7 @@ func LoginHandler(c *gin.Context) {
 	//2.验证账号密码
 	user, err := logic.Login(p)
 	if err != nil {
-		zap.L().Error("login.Login failed", zap.String("username", p.Username))
+		zap.L().Error("login.Login failed", zap.String("username", p.Username), zap.Error(err))
 		if errors.Is(err, mysql.ErrorUserNotExit) {
 			ResponseError(c, CodeUserNotExist)
 			return
