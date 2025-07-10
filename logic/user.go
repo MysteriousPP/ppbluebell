@@ -17,6 +17,24 @@ import (
 // 	mysql.InsertUser()
 // }
 
+func GetUserProfile(user_id int64) (user_profile *models.UserProfile, err error) {
+	user, err := mysql.GetUserProfileByID(user_id)
+	user_profile = new(models.UserProfile)
+	user_profile.UserID = user.UserID
+	user_profile.Username = user.Username
+	user_profile.Nickname = user.Nickname.String
+	user_profile.UserType = user.UserType
+	user_profile.Profile = user.Profile.String
+	user_profile.Email = user.Email.String
+	user_profile.Phone = user.Phone.String
+	user_profile.Avatar = user.Avatar.String
+
+	return
+}
+func UpdateUserProfile(user_profile *models.UserProfile) (err error) {
+	err = mysql.UpdateUserProfile(user_profile)
+	return
+}
 func SignUp(p *models.ParamSignUp) (err error) {
 	//1.判断用户存不存在
 	if err = mysql.CheckUserExist(p.Username); err != nil {

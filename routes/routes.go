@@ -52,7 +52,7 @@ func Setup() *gin.Engine {
 		MaxAge:           time.Duration(viper.GetInt("cors.max_age")) * time.Hour,
 	}))
 	fmt.Println("1111", viper.GetStringSlice("cors.allow_origins"))
-	fmt.Println("2222", []string{"http://localhost:5173", "nmnmnmnmnmnm"})
+	fmt.Println("2222", []string{"http://localhost:5173", "nmnmnmnmnmnm1111111"})
 	v1 := r.Group("/api/v1")
 	//注册路由业务
 	v1.POST("/signup", controller.SignUpHandler)
@@ -67,9 +67,14 @@ func Setup() *gin.Engine {
 		v1.POST("/post", controller.CreatePostHandler)
 		v1.GET("/post/:id", controller.GetPostDetailHandler)
 		v1.DELETE("/post/:id", controller.DeletePostHandler)
+		v1.POST("/post/:id/comment", controller.CreateCommentHandler)
+		v1.GET("/post/:id/comment", controller.GetCommentListHandler)
+		v1.DELETE("/post/:id/comment", controller.DeleteCommentHandler)
 		v1.GET("posts/", controller.GetPostListHandler)
 		v1.GET("posts2/", controller.GetPostListHandler2)
 		v1.POST("uploadimg", controller.UploadImageHandler)
+		v1.GET("user/:user_id/profile", controller.GetUserProfileHandler)
+		v1.POST("user/:user_id/profile", controller.UpdateUserProfileHandler)
 		//投票
 		v1.POST("/vote", controller.PostVoteController)
 	}

@@ -9,6 +9,53 @@ import (
 	"go.uber.org/zap"
 )
 
+func DeleteCommentById(commentID, userID int64) (err error) {
+	sqlStr := `update comment
+	set status = 0
+	where comment_id = ? and from_id = ? 
+	`
+	// 执行更新
+	result, err := db.Exec(sqlStr, commentID, userID)
+	if err != nil {
+		zap.L().Error("delete comment failed", zap.Error(err))
+		return
+	}
+
+	// 检查是否有行受影响
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		zap.L().Error("failed to get rows affected", zap.Error(err))
+		return
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
+func GetCommentListById(pid int64) (data []*models.Comment, err error) {
+	sqlStr := `select comment_id, post_id, from_id, to_id, content, create_time
+	from comment
+	where status = 1 and post_id = ?
+	order by create_time
+	desc
+	`
+	data = make([]*models.Comment, 1)
+	err = db.Select(&data, sqlStr, pid)
+	return
+}
+func CreateComment(C *models.Comment) (err error) {
+	sqlStr := `insert into comment(
+	comment_id, post_id, from_id, to_id, content)
+	values(?,?,?,?,?)`
+
+	_, err = db.Exec(sqlStr, C.CommentID, C.PostID, C.FromID, C.ToID, C.Content)
+	if err != nil {
+		zap.L().Error("insert comment failed", zap.Error(err))
+		err = ErrorInsertFailed
+		return
+	}
+	return
+}
 func CreatePost(p *models.Post) (err error) {
 	sqlStr := `insert into post(
 	post_id, title, content, author_id, community_id)

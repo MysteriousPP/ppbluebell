@@ -9,6 +9,62 @@ import (
 	"go.uber.org/zap"
 )
 
+// DeleteCommentHandler 删除评论
+func DeleteCommentHandler(c *gin.Context) {
+	param := struct {
+		CommentID string `json:"comment_id"`
+		UserID    string `json:"user_id"`
+	}{}
+
+	if err := c.ShouldBindJSON(&param); err != nil {
+		zap.L().Error("delete comment with invalid", zap.Error(err))
+		ResponseError(c, CodeInvalidParams)
+		return
+	}
+	CommentID, _ := strconv.ParseInt(param.CommentID, 10, 64)
+	UserID, _ := strconv.ParseInt(param.UserID, 10, 64)
+	userID, err := getCurrentUserID(c)
+	if err != nil {
+		zap.L().Error("GetCurrentUserID() failed", zap.Error(err))
+		ResponseError(c, CodeNeedLogin)
+		return
+	}
+	if userID != UserID {
+		zap.L().Error("Invalid userID", zap.Error(err))
+		zap.L().Error("Invalid userID", zap.Error(err), zap.Int64("userID:", userID))
+		zap.L().Error("Invalid userID", zap.Error(err), zap.Int64("UserID:", UserID))
+		ResponseError(c, CodeInvalidUserID)
+		return
+	}
+	//
+	if err := logic.DeleteCommentById(CommentID, userID); err != nil {
+		zap.L().Error("logic.DeleteCommentByID failed", zap.Error(err))
+		ResponseError(c, CodeServerBusy)
+		return
+	}
+	ResponseSuccess(c, nil)
+}
+
+// GetCommentListHandler 获取帖子评论的处理函数
+func GetCommentListHandler(c *gin.Context) {
+	// 1.获取参数(从url中获取帖子的id)
+	pidStr := c.Param("id")
+	pid, err := strconv.ParseInt(pidStr, 10, 64)
+	if err != nil {
+		zap.L().Error("get comment with invalid param", zap.Error(err))
+		ResponseError(c, CodeInvalidParams)
+		return
+	}
+	// 2.根据id去查帖子数据（查数据库）
+	data, err := logic.GetCommentListById(pid)
+	if err != nil {
+		zap.L().Error("logic.GetCommentById(pid) failed", zap.Error(err))
+		ResponseError(c, CodeServerBusy)
+		return
+	}
+	// 3.返回响应
+	ResponseSuccess(c, data)
+}
 func CreatePostHandler(c *gin.Context) {
 	//1.获取参数及参数的校验
 	p := new(models.Post)
@@ -32,6 +88,39 @@ func CreatePostHandler(c *gin.Context) {
 	}
 	//3.返回响应
 	ResponseSuccess(c, nil)
+}
+
+// CreateCommentHandler 创建评论的处理函数
+func CreateCommentHandler(c *gin.Context) {
+	Comment := new(models.Comment)
+	if err := c.ShouldBindJSON(Comment); err != nil {
+		ResponseError(c, CodeInvalidParams)
+		return
+	}
+	userID, err := getCurrentUserID(c)
+	if err != nil {
+		zap.L().Error("GetCurrentUserID() failed", zap.Error(err))
+		ResponseError(c, CodeNeedLogin)
+		return
+	}
+	Comment.FromID = userID
+
+	pidStr := c.Param("id")
+	pid, err := strconv.ParseInt(pidStr, 10, 64)
+	if err != nil {
+		zap.L().Error("create comment with invalid postid", zap.Error(err))
+		ResponseError(c, CodeInvalidParams)
+		return
+	}
+	Comment.PostID = pid
+
+	if err = logic.CreateCommentInPost(Comment); err != nil {
+		zap.L().Error("logic.CreateCommentInPost(C) failed", zap.Error(err))
+		ResponseError(c, CodeServerBusy)
+		return
+	}
+	ResponseSuccess(c, nil)
+
 }
 
 // DeletePostHandler 删除帖子的处理函数

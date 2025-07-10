@@ -18,3 +18,16 @@ type ApiPostDetail struct {
 	*Post
 	*CommunityDetail `json:"community"`
 }
+
+type Comment struct {
+	CommentID  int64 `json:"comment_id,string" db:"comment_id"`
+	PostID     int64 `json:"post_id,string" db:"post_id" binding:"required"`
+	FromID     int64 `json:"from_id,string" db:"from_id" binding:"required"`
+	ToID       int64 `json:"to_id,string" db:"to_id"`
+	Status     int32
+	Content    string    `json:"content" db:"content" binding:"required"`
+	FromName   string    `json:"from_name"`
+	ToName     string    `json:"to_name"`
+	FromAvatar string    `json:"from_avatar"`
+	CreateTime time.Time `json:"create_time" db:"create_time"`
+}

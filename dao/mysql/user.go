@@ -6,11 +6,28 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"errors"
-
-	"go.uber.org/zap"
 )
 
 const secret = "MysteriousPP"
+
+// GetUserProfileByID 根据用户ID查询用户信息
+func GetUserProfileByID(userID int64) (user *models.User, err error) {
+	user = new(models.User)
+	sqlStr := `select user_id, username , nickname , email , usertype , avatar, profile, phone
+	from user where user_id = ?`
+	err = db.Get(user, sqlStr, userID)
+	return
+}
+
+// UpdateUserProfile 更新用户信息
+func UpdateUserProfile(user *models.UserProfile) (err error) {
+
+	sqlStr := `update user 
+	set nickname = ?, email = ?, avatar = ?, profile = ?, phone = ?  
+	where user_id = ?`
+	_, err = db.Exec(sqlStr, user.Nickname, user.Email, user.Avatar, user.Profile, user.Phone, user.UserID)
+	return
+}
 
 // CheckUserExist 检查指定用户名的用户是否存在
 func CheckUserExist(username string) (err error) {
@@ -77,8 +94,9 @@ func Login(user *models.User) (err error) {
 	}
 	// 生成加密密码与查询到的密码比较
 	password := encryptPassword(originPassword)
-	zap.L().Error("oriPassword", zap.String("oriPassword", originPassword))
-	zap.L().Error("password", zap.String("Password", password))
+	// zap.L().Error("oriPassword", zap.String("oriPassword", originPassword))
+	// zap.L().Error("password", zap.String("Password", password))
+	// zap.L().Error("user.password", zap.String("user.Password", user.Password))
 	if user.Password != password {
 		return ErrorPasswordWrong
 	}
@@ -87,7 +105,7 @@ func Login(user *models.User) (err error) {
 
 func GetUserById(uid int64) (user *models.User, err error) {
 	user = new(models.User)
-	sqlStr := `select user_id, username from user where user_id = ?`
+	sqlStr := `select user_id, username, avatar from user where user_id = ?`
 	err = db.Get(user, sqlStr, uid)
 	return
 }

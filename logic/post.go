@@ -9,6 +9,47 @@ import (
 	"go.uber.org/zap"
 )
 
+func DeleteCommentById(commentID, userID int64) (err error) {
+	return mysql.DeleteCommentById(commentID, userID)
+}
+func GetCommentListById(pid int64) (data []*models.Comment, err error) {
+	data, err = mysql.GetCommentListById(pid)
+	if err != nil {
+		return nil, err
+	}
+	for i := range data {
+		fromUser, err := mysql.GetUserById(data[i].FromID)
+		// zap.L().Debug("fromUser.Username", zap.String("value", fromUser.Username))
+		if err != nil {
+			zap.L().Error("mysql.GetUserById failed", zap.Error(err))
+			return nil, err
+		}
+		if data[i].ToID != 0 {
+			ToUser, err := mysql.GetUserById(data[i].ToID)
+			if err != nil {
+				zap.L().Error("mysql.GetUserById failed", zap.Error(err))
+				return nil, err
+			}
+			data[i].ToName = ToUser.Username
+
+		}
+
+		data[i].FromName = fromUser.Username
+		data[i].FromAvatar = fromUser.Avatar.String
+		//fmt.Printf("fromUser.Avatar.String: %v\n", fromUser.Avatar.String)
+		// zap.L().Debug("data[i].FromName", zap.String("value", data[i].FromName))
+	}
+	return
+
+}
+func CreateCommentInPost(C *models.Comment) (err error) {
+	C.CommentID = snowflake.GenID()
+	err = mysql.CreateComment(C)
+	if err != nil {
+		return err
+	}
+	return
+}
 func CreatePost(p *models.Post) (err error) {
 	//1.生成post id
 	p.PostID = snowflake.GenID()
